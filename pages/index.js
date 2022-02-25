@@ -95,7 +95,6 @@ export default function Index() {
   const [backgroundNoise, setBackgroundNoise] = useState(<></>)
   const [bgBrightness, setBgBrightness] = useState(5)
   const [timer, setTimer] = useState(0)
-  const [playVideo, setPlayVideo] = useState(false)
   const timerRef = useRef()
   const videosRef = useRef(<></>)
 
@@ -132,12 +131,6 @@ export default function Index() {
   useEffect(() => {
     setBackgroundNoise(genBackgroundNoise(window.innerWidth, window.innerHeight, bgBrightness))
   }, [bgBrightness])
-
-  useEffect(() => {
-    setTimeout(() => {
-      setPlayVideo(true)
-    }, 10 * 1000)
-  }, [])
 
   return (
     <div className={styles.container}>
