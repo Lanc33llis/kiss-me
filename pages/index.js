@@ -96,33 +96,68 @@ export default function Index() {
   const [bgBrightness, setBgBrightness] = useState(5)
   const [timer, setTimer] = useState(0)
   const timerRef = useRef()
-  const videosRef = useRef(<></>)
+  const videosRef = useRef(null)
   const cursorRef = useRef(<></>)
 
+  const [isDesktop, setDesktop] = useState(null)
+
+  const updateMedia = () => {
+    setDesktop(window.innerWidth > 800);
+  };
+
   useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setTimer(t => t + 100)
-    }, 100)
-
-    const videosContainer = videosRef.current
-    const canvases = videosContainer.querySelectorAll('canvas')
-    const videos = videosContainer.querySelectorAll('video')
-    canvases.forEach((canvas, i) => {
-      canvas.addEventListener("mouseenter", (eve) => {
-        eve.target.style.opacity = "1"
-        videos[i].play()
-      })
-      canvas.addEventListener("mouseleave", (eve) => {
-        eve.target.style.opacity = "0"
-        videos[i].pause()
-      })
-    })
-
-    document.addEventListener("mousemove", (eve) => {
-      cursorRef.current.style.left = eve.clientX - 25 + "px"
-      cursorRef.current.style.top = eve.clientY - 25+ "px"
-    })
+    updateMedia()
+    window.addEventListener("resize", (updateMedia));
+    return () => window.removeEventListener("resize", updateMedia);
   }, [])
+
+  useEffect(() => {
+    if (isDesktop) {
+      timerRef.current = setInterval(() => {
+        setTimer(t => t + 100)
+      }, 100)
+  
+      const videosContainer = videosRef.current
+      const canvases = videosContainer.querySelectorAll('canvas')
+      const videos = videosContainer.querySelectorAll('video')
+      canvases.forEach((canvas, i) => {
+        canvas.addEventListener("mouseenter", (eve) => {
+          eve.target.style.opacity = "1"
+          videos[i].play()
+        })
+        canvas.addEventListener("mouseleave", (eve) => {
+          eve.target.style.opacity = "0"
+          videos[i].pause()
+        })
+      })
+  
+      document.addEventListener("mousemove", (eve) => {
+        cursorRef.current.style.left = eve.clientX - 25 + "px"
+        cursorRef.current.style.top = eve.clientY - 25+ "px"
+      })
+    } else {
+      clearInterval(timerRef.current)
+      setTimer(0)
+
+      //remove event listenres
+      const videosContainer = videosRef.current
+      console.log(videosRef)
+      if (videosContainer) {
+        const canvases = videosContainer.querySelectorAll('canvas')
+        const videos = videosContainer.querySelectorAll('video')
+        canvases.forEach((canvas, i) => {
+          canvas.removeEventListener("mouseenter", (eve) => {
+            eve.target.style.opacity = "1"
+            videos[i].play()
+          })
+          canvas.removeEventListener("mouseleave", (eve) => {
+            eve.target.style.opacity = "0"
+            videos[i].pause()
+          })
+        })
+      }
+    }
+  }, [isDesktop])
 
   useEffect(() => {
     if (timer < 2000) {
@@ -143,21 +178,27 @@ export default function Index() {
 
   return (
     <div className={styles.container}>
-      <div className={styles["background-noise"]}>
-        {backgroundNoise}
-      </div>
-      <div className={styles.title}>
+      { !isDesktop && (<div> 
         <h1>
-          KISS
+          Please use a larger display to view this site.
         </h1>
-      </div>
-      <div ref={videosRef} className={styles.content}>
-        <AsciiVideo width={320} height={320} src="1.mp4" />
-        <AsciiVideo width={320} height={320} src="2.mp4" />
-        <AsciiVideo width={320} height={320} src="3.mp4" />
-        <AsciiVideo width={320} height={320} src="4.mp4" />
-      </div>
-      <div ref={cursorRef} className={styles.cursor}/>
+      </div>) || (<>
+        <div className={styles["background-noise"]}>
+          {backgroundNoise}
+        </div>
+        <div className={styles.title}>
+          <h1>
+            KISS
+          </h1>
+        </div>
+        <div ref={videosRef} className={styles.content}>
+          <AsciiVideo width={320} height={320} src="1.mp4" />
+          <AsciiVideo width={320} height={320} src="2.mp4" />
+          <AsciiVideo width={320} height={320} src="3.mp4" />
+          <AsciiVideo width={320} height={320} src="4.mp4" />
+        </div>
+        <div ref={cursorRef} className={styles.cursor}/>
+      </>) }
     </div>
   )
 }
