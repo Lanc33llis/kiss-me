@@ -97,6 +97,7 @@ export default function Index() {
   const [timer, setTimer] = useState(0)
   const timerRef = useRef()
   const videosRef = useRef(<></>)
+  const cursorRef = useRef(<></>)
 
   useEffect(() => {
     timerRef.current = setInterval(() => {
@@ -106,15 +107,20 @@ export default function Index() {
     const videosContainer = videosRef.current
     const canvases = videosContainer.querySelectorAll('canvas')
     const videos = videosContainer.querySelectorAll('video')
-    canvases.forEach((video, i) => {
-      video.addEventListener("mouseenter", (eve) => {
+    canvases.forEach((canvas, i) => {
+      canvas.addEventListener("mouseenter", (eve) => {
         eve.target.style.opacity = "1"
         videos[i].play()
       })
-      video.addEventListener("mouseleave", (eve) => {
+      canvas.addEventListener("mouseleave", (eve) => {
         eve.target.style.opacity = "0"
         videos[i].pause()
       })
+    })
+
+    document.addEventListener("mousemove", (eve) => {
+      cursorRef.current.style.left = eve.clientX - 25 + "px"
+      cursorRef.current.style.top = eve.clientY - 25+ "px"
     })
   }, [])
 
@@ -125,11 +131,14 @@ export default function Index() {
       setBgBrightness(bg => bg + .5)
     } if (timer > 10000) {
       setBgBrightness(bg => bg >= 2 ? bg - 1 : 1)
-    }
+    } 
   }, [timer])
   
   useEffect(() => {
     setBackgroundNoise(genBackgroundNoise(window.innerWidth, window.innerHeight, bgBrightness))
+    if (bgBrightness == 1) {
+      setTimer(0)
+    }
   }, [bgBrightness])
 
   return (
@@ -148,6 +157,7 @@ export default function Index() {
         <AsciiVideo width={320} height={320} src="3.mp4" />
         <AsciiVideo width={320} height={320} src="4.mp4" />
       </div>
+      <div ref={cursorRef} className={styles.cursor}/>
     </div>
   )
 }
